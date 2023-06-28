@@ -2,13 +2,13 @@ pipeline {
     agent any
 
     stages {
-        stage('Compile') {
+        stage('install') {
             steps {
                 // Checkout source code from Git
                 checkout scm
 
                 // Build the project with Maven
-                sh 'mvn clean compile'
+                sh 'mvn clean install'
             }
         }
 
