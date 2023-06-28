@@ -1,0 +1,58 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Compile') {
+            steps {
+                // Checkout source code from Git
+                checkout scm
+
+                // Build the project with Maven
+                sh 'mvn clean compile'
+            }
+        }
+
+        stage('Test') {
+            when {
+                // Trigger the stage only if the previous stage was successful (build is stable)
+                expression { currentBuild.result == 'SUCCESS' }
+            }
+            steps {
+                // Run unit tests with Maven and generate JUnit test report
+                sh 'mvn test'
+                junit 'target/surefire-reports/*.xml'
+            }
+        }
+
+        stage('Deploy') {
+            when {
+                // Trigger the stage only if the previous stage was successful (tests passed)
+                expression { currentBuild.result == 'SUCCESS' }
+            }
+            steps {
+                // Package the Maven project
+                sh 'mvn package'
+
+                // Deploy the war file to Tomcat server
+                sh 'cp target/*.war /path/to/tomcat/webapps/'
+
+                // Check deployment status
+                script {
+                    def deployStatus = sh(returnStatus: true, script: 'curl --silent --output /dev/null --write-out "%{http_code}" http://localhost:8080/')
+                    if (deployStatus != 200) {
+                        // Notify via email if deployment failed
+                        emailext body: "Deployment to Tomcat failed. HTTP status code: ${deployStatus}",
+                                 subject: "Bookzy Deployment Failed",
+                                 to: "prasanthmeduri58@gmail.com",
+                                 attachLog: true
+                    }
+                }
+            }
+        }
+    }
+
+    // Trigger the pipeline to poll the SCM nightly for commits
+    triggers {
+        cron('* * * * *')
+    }
+}
