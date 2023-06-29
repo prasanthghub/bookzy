@@ -2,6 +2,13 @@ pipeline {
     agent any
     
     stages {
+        stage('Checkout') {
+            agent any
+            steps {
+                git branch: 'main', credentialsId: 'prasanthghub', url: 'https://github.com/prasanthghub/bookzy.git'
+            }
+        }
+        
         stage('Build') {
             agent {
                 label 'slave-1'
@@ -36,13 +43,5 @@ pipeline {
     // Only run the pipeline on the specified branch
     options {
         skipDefaultCheckout(true)
-    }
-    stages {
-        stage('Checkout') {
-            agent any
-            steps {
-                git branch: 'main', credentialsId: 'prasanthghub', url: 'https://github.com/prasanthghub/bookzy.git'
-            }
-        }
     }
 }
