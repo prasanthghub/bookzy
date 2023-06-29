@@ -41,7 +41,7 @@ pipeline {
         stage('Checkout') {
             agent any
             steps {
-                git branch: 'boozky', credentialsId: 'prasanthghub', url: 'https://github.com/prasanthghub/bookzy.git'
+                git branch: 'main', credentialsId: 'prasanthghub', url: 'https://github.com/prasanthghub/bookzy.git'
             }
         }
     }
